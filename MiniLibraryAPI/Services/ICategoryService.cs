@@ -1,13 +1,14 @@
 using MiniLibraryAPI.DTOs;
 using MiniLibraryAPI.Entities;
+using MiniLibraryAPI.Models.DTOs;
 
 namespace MiniLibraryAPI.Services;
 
 public interface ICategoryService
 {
-    Task<Category> AddCategory(Category category);
-    public Task<Category> UpdateCategory(Category category);
+    Task<CategoryDtos> AddCategory(CreateCategoryDto category);
+    public Task<Category> UpdateCategory(CategoryDtos category);
     public Task<int> DeleteCategory(int id);
-    public  Task<List<Category>> GetCategories(CategoryFilter filter);
-    public  Task<Category?> GetCategoryById(int id);
+    public  Task<List<CategoryDtos>> GetCategories(CategoryFilter filter);
+    public  Task<CategoryDtos?> GetCategoryById(int id);
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MiniLibraryAPI.DTOs;
 using MiniLibraryAPI.Entities;
+using MiniLibraryAPI.Models.DTOs;
 using MiniLibraryAPI.Services;
 
 namespace MiniLibraryAPI.Controllers;
@@ -11,14 +12,14 @@ namespace MiniLibraryAPI.Controllers;
 public class OrderController(IOrderService _service) : ControllerBase
 {
     [HttpPost]
-    public async Task<Order> AddOrder(Order order)
+    public async Task<OrderDto> AddOrder(CreateOrderDto order)
     {
         var CreatedOrder = await _service.AddOrder(order);
         return CreatedOrder;
     }
     
     [HttpPut]
-    public async Task<Order> UpdateOrder( Order order)
+    public async Task<Order> UpdateOrder(OrderDto order)
     { 
         var updateOrder = await _service.UpdateOrder(order);
         return updateOrder;
@@ -38,14 +39,14 @@ public class OrderController(IOrderService _service) : ControllerBase
 
 
     [HttpGet]
-    public async Task<List<Order>> GetOrders([FromQuery]OrderFilter filter)
+    public async Task<List<OrderDto>> GetOrders([FromQuery]OrderFilter filter)
     {
         var orders = await _service.GetOrders(filter);
         return orders;
     }
 
     [HttpGet("{id}")]
-    public async Task<Order> GetOrderById(int id)
+    public async Task<OrderDto> GetOrderById(int id)
     {
         var order = await _service.GetOrderById(id);
         return order;

@@ -1,25 +1,31 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MiniLibraryAPI.Data;
 using MiniLibraryAPI.DTOs;
 using MiniLibraryAPI.Entities;
+using MiniLibraryAPI.Models.DTOs;
 
 namespace MiniLibraryAPI.Services;
 
-public class AuthorService(ApplicationDbContext context) : IAuthorService
+public class AuthorService(ApplicationDbContext context, IMapper mapper) : IAuthorService
 {
-    public async Task<Author> AddAuthor(Author author)
+    public async Task<AuthorDto> AddAuthor(CreateAuthorDto author_)
     {
+        var author = mapper.Map<Author>(author_);
         context.Authors.Add(author);
         await context.SaveChangesAsync();
-        return author;
+        return mapper.Map<AuthorDto>(author);
     }
 
-    public async Task<Author> UpdateAuthor(Author author)
+    public async Task<Author> UpdateAuthor(AuthorDto author_)
     {
-        context.Authors.Update(author);
+        var check = await context.Authors.FindAsync(author_.Id);
+        check.FirstName = author_.FirstName;
+        check.LastName = author_.LastName;
+        context.Authors.Update(check);
         await context.SaveChangesAsync();
-        return author;
+        return mapper.Map<Author>(author_);    
     }
 
     public async Task<int> DeleteAuthor(int id)
@@ -30,7 +36,7 @@ public class AuthorService(ApplicationDbContext context) : IAuthorService
         return i;
     }
 
-    public async Task<List<Author>> GetAuthors(AuthorsFilter filter)
+    public async Task<List<AuthorDto>> GetAuthors(AuthorsFilter filter)
     {
         var query = context.Authors
             .AsQueryable();
@@ -47,12 +53,15 @@ public class AuthorService(ApplicationDbContext context) : IAuthorService
         {
             query = query.Where(x => x.LastName != null && x.LastName.Contains(filter.LastName));
         }
-
-        return await query.ToListAsync();
+        var author = await query.ToListAsync();
+        var translate = mapper.Map<List<AuthorDto>>(author);
+        return translate;
     }
 
-    public async Task<Author?> GetAuthorsById(int id)
+    public async Task<AuthorDto?> GetAuthorsById(int id)
     {
-        return await context.Authors.FirstOrDefaultAsync(a => a.Id == id);
+        var author = await context.Authors.FirstOrDefaultAsync(a => a.Id == id);
+        var translate = mapper.Map<AuthorDto>(author);
+        return translate;
     }
 }

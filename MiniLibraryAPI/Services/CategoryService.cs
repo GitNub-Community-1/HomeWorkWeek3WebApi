@@ -1,23 +1,30 @@
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MiniLibraryAPI.Data;
 using MiniLibraryAPI.DTOs;
 using MiniLibraryAPI.Entities;
+using MiniLibraryAPI.Models.DTOs;
+
 namespace MiniLibraryAPI.Services;
 
-public class CategoryService(ApplicationDbContext context) : ICategoryService
+public class CategoryService(ApplicationDbContext context, IMapper mapper) : ICategoryService
 { 
-    public async Task<Category> AddCategory(Category category)
+    public async Task<CategoryDtos> AddCategory(CreateCategoryDto categoryDto)
     {
+        var category = mapper.Map<Category>(categoryDto);
         context.Categories.Add(category);
         await context.SaveChangesAsync();
-        return category;
+        return mapper.Map<CategoryDtos>(category);
     }
 
-    public async Task<Category> UpdateCategory(Category category)
+    public async Task<Category> UpdateCategory(CategoryDtos category)
     {
-        context.Categories.Update(category);
+        var check = await context.Categories.FindAsync(category.Id);
+        check.Name = category.Name;
+        check.Description = category.Description;
+        context.Categories.Update(check);
         await context.SaveChangesAsync();
-        return category;
+        return mapper.Map<Category>(category);
     }
 
     public async Task<int> DeleteCategory(int id)
@@ -30,7 +37,7 @@ public class CategoryService(ApplicationDbContext context) : ICategoryService
         return await context.SaveChangesAsync();
     }
 
-    public async Task<List<Category>> GetCategories(CategoryFilter filter)
+    public async Task<List<CategoryDtos>> GetCategories(CategoryFilter filter)
     {
         var query = context.Categories
             .AsQueryable();
@@ -47,12 +54,15 @@ public class CategoryService(ApplicationDbContext context) : ICategoryService
         {
             query = query.Where(x => x.Description.Contains(filter.Description));
         }
-        
-        return await query.ToListAsync();
+        var category =  await query.ToListAsync();
+        var translate = mapper.Map<List<CategoryDtos>>(category);
+        return translate;
     }
 
-    public async Task<Category?> GetCategoryById(int id)
+    public async Task<CategoryDtos?> GetCategoryById(int id)
     {
-        return await context.Categories.FirstOrDefaultAsync(c => c.Id == id);
+        var category = await context.Books.FirstOrDefaultAsync(a => a.Id == id);
+        var translate = mapper.Map<CategoryDtos>(category);
+        return translate;
     }
 }

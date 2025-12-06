@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using MiniLibraryAPI.AutoMapper;
 using MiniLibraryAPI.Data;
+using MiniLibraryAPI.Middlewares;
 using MiniLibraryAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +12,7 @@ builder.WebHost.UseUrls("http://localhost:5000", "https://localhost:7000");
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddAutoMapper(typeof(MapperProfile));
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
@@ -27,7 +30,7 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
-
+app.UseMiddleware<Error_Check_And_Log>();
 app.MapControllers();
 
 // app.UseHttpsRedirection();

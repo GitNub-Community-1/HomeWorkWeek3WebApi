@@ -1,24 +1,32 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using MiniLibraryAPI.Data;
 using MiniLibraryAPI.DTOs;
 using MiniLibraryAPI.Entities;
+using MiniLibraryAPI.Models.DTOs;
 
 namespace MiniLibraryAPI.Services;
 
-public class BookService(ApplicationDbContext context) : IBookService
+public class BookService(ApplicationDbContext context, IMapper mapper) : IBookService
 {
-    public async Task<Book> AddBook(Book book)
+    public async Task<BookDto> AddBook(CreateBookDto book_)
     {
+        var book = mapper.Map<Book> (book_);
         context.Books.Add(book);
         await context.SaveChangesAsync();
-        return book;
+        return mapper.Map<BookDto>(book);
     }
 
-    public async Task<Book> UpdateBook(Book book)
+    public async Task<Book> UpdateBook(BookDto book)
     {
-        context.Books.Update(book);
+        var check = await context.Books.FindAsync(book.Id);
+        check.Name = book.Name;
+        check.Description = book.Description;
+        check.AuthorId = book.AuthorId;
+        check.CategoryId = book.CategoryId;
+        context.Books.Update(check);
         await context.SaveChangesAsync();
-        return book;
+        return  mapper.Map<Book>(book);
     }
 
     public async Task<int> DeleteBook(int id)
@@ -29,7 +37,7 @@ public class BookService(ApplicationDbContext context) : IBookService
         return i;
     }
 
-    public async Task<List<Book>> GetBooks(BookFilter filter)
+    public async Task<List<BookDto>> GetBooks(BookFilter filter)
     {
         var query = context.Books
             .AsQueryable();
@@ -56,11 +64,15 @@ public class BookService(ApplicationDbContext context) : IBookService
         {
             query = query.Where(x => x.CategoryId == filter.CategoryId.Value);
         }
-        return await query.ToListAsync();
+        var books = await query.ToListAsync();
+        var translate = mapper.Map<List<BookDto>>(books);
+        return translate;
     }
 
-    public async Task<Book> GetBookById(int id)
+    public async Task<BookDto> GetBookById(int id)
     {
-        return await context.Books.FirstOrDefaultAsync(b => b.Id == id);
+        var book = await context.Books.FirstOrDefaultAsync(b => b.Id == id);
+        var translate = mapper.Map<BookDto>(book);
+        return translate;
     }
 }

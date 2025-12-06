@@ -1,13 +1,14 @@
 ﻿using MiniLibraryAPI.DTOs;
 using MiniLibraryAPI.Entities;
+using MiniLibraryAPI.Models.DTOs;
 
 namespace MiniLibraryAPI.Services;
 
 public interface IOrderService
 {
-    Task<Order> AddOrder(Order order);
-    Task<Order> UpdateOrder(Order order);
+    Task<OrderDto> AddOrder(CreateOrderDto order);
+    Task<Order> UpdateOrder(OrderDto order);
     Task<int> DeleteOrder(int id);
-    Task<List<Order>> GetOrders(OrderFilter filter);
-    Task<Order> GetOrderById(int id);
+    Task<List<OrderDto>> GetOrders(OrderFilter filter);
+    Task<OrderDto> GetOrderById(int id);
 }

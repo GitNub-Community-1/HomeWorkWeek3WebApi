@@ -1,23 +1,32 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;   
 using MiniLibraryAPI.Data;
 using MiniLibraryAPI.DTOs;
 using MiniLibraryAPI.Entities;
+using MiniLibraryAPI.Models.DTOs;
+using AutoMapper;
 
 namespace MiniLibraryAPI.Services;
 
-public class OrderService(ApplicationDbContext context) : IOrderService
+public class OrderService(ApplicationDbContext context,  IMapper mapper) : IOrderService
 {
-    public async Task<Order> AddOrder(Order order)
+    public async Task<OrderDto> AddOrder(CreateOrderDto orderdto)
     {
+        var order = mapper.Map<Order>(orderdto);
         context.Orders.Add(order);
         await context.SaveChangesAsync();
-        return order;    }
+        return mapper.Map<OrderDto>(order);;    
+    }
 
-    public async Task<Order> UpdateOrder(Order order)
+    public async Task<Order> UpdateOrder(OrderDto order_)
     {
-        context.Orders.Update(order);
+        var check = await context.Orders.FindAsync(order_.Id);
+        check.Name = order_.Name;
+        check.Phone = order_.Phone;
+        check.BookId = order_.BookId;
+        context.Orders.Update(check);
         await context.SaveChangesAsync();
-        return order;    }
+        return mapper.Map<Order>(order_);    
+    }
 
     public async Task<int> DeleteOrder(int id)
     {
@@ -27,8 +36,9 @@ public class OrderService(ApplicationDbContext context) : IOrderService
         return i;
     }
 
-    public async Task<List<Order>> GetOrders(OrderFilter filter)
+    public async Task<List<OrderDto>> GetOrders(OrderFilter filter)
     {
+        
         var query = context.Orders
             .AsQueryable();
         
@@ -49,11 +59,15 @@ public class OrderService(ApplicationDbContext context) : IOrderService
             query = query.Where(x => x.Phone.Contains(filter.Phone));
         }
         
-        return await query.ToListAsync();
+        var orders = await query.ToListAsync();
+        var translate = mapper.Map<List<OrderDto>>(orders);
+        return translate;
     }
 
-    public async Task<Order> GetOrderById(int id)
+    public async Task<OrderDto> GetOrderById(int id)
     {
-        return await context.Orders.FirstOrDefaultAsync(a => a.Id == id);
+        var order = await context.Orders.FirstOrDefaultAsync(a => a.Id == id);
+        var translate = mapper.Map<OrderDto>(order);
+        return translate;
     }
 }
