@@ -21,7 +21,7 @@ public class BookService(ApplicationDbContext context, IMapper mapper) : IBookSe
     {
         var check = await context.Books.FindAsync(book.Id);
         check.Name = book.Name;
-        check.Description = book.Description;
+         check.Description = book.Description;
         check.AuthorId = book.AuthorId;
         check.CategoryId = book.CategoryId;
         context.Books.Update(check);

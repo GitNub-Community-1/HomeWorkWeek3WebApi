@@ -38,6 +38,8 @@ public class Error_Check_And_Log
             Console.WriteLine();
             Console.WriteLine("====================================================");
             Console.WriteLine("Your Error Message: " + e.Message);
+            Console.WriteLine();
+            Console.WriteLine(e.InnerException?.Message);
             Console.WriteLine("====================================================");
             Console.WriteLine();
             return $"Error {e.Message}";
