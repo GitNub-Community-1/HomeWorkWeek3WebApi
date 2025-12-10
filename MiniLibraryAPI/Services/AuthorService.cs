@@ -5,63 +5,135 @@ using MiniLibraryAPI.Data;
 using MiniLibraryAPI.DTOs;
 using MiniLibraryAPI.Entities;
 using MiniLibraryAPI.Models.DTOs;
+using MiniLibraryAPI.Infrastructure.Responses;
+using System.Net;
 
 namespace MiniLibraryAPI.Services;
 
 public class AuthorService(ApplicationDbContext context, IMapper mapper) : IAuthorService
 {
-    public async Task<AuthorDto> AddAuthor(CreateAuthorDto author_)
+    public async Task<Response<AuthorDto>> AddAuthor(CreateAuthorDto author_)
     {
-        var author = mapper.Map<Author>(author_);
-        context.Authors.Add(author);
-        await context.SaveChangesAsync();
-        return mapper.Map<AuthorDto>(author);
-    }
-
-    public async Task<Author> UpdateAuthor(AuthorDto author_)
-    {
-        var check = await context.Authors.FindAsync(author_.Id);
-        check.FirstName = author_.FirstName;
-        check.LastName = author_.LastName;
-        context.Authors.Update(check);
-        await context.SaveChangesAsync();
-        return mapper.Map<Author>(author_);    
-    }
-
-    public async Task<int> DeleteAuthor(int id)
-    {
-        var author = await context.Authors.FindAsync(id);
-        context.Authors.Remove(author);
-        var i =  await context.SaveChangesAsync();
-        return i;
-    }
-
-    public async Task<List<AuthorDto>> GetAuthors(AuthorsFilter filter)
-    {
-        var query = context.Authors
-            .AsQueryable();
-        
-        if (filter.Id.HasValue)
+        try
         {
-            query = query.Where(x => x.Id == filter.Id.Value);
+            var author = mapper.Map<Author>(author_);
+            context.Authors.Add(author);
+            await context.SaveChangesAsync();
+            var result = mapper.Map<AuthorDto>(author);
+            return new Response<AuthorDto>(HttpStatusCode.Created, "Author created successfully!", result);
         }
-        if (!string.IsNullOrEmpty(filter.FirstName))
+        catch (Exception ex)
         {
-            query = query.Where(x => x.FirstName.Contains(filter.FirstName));
+            return new Response<AuthorDto>(HttpStatusCode.BadRequest, $"Error: {ex.Message}");
         }
-        if (!string.IsNullOrEmpty(filter.LastName))
-        {
-            query = query.Where(x => x.LastName != null && x.LastName.Contains(filter.LastName));
-        }
-        var author = await query.ToListAsync();
-        var translate = mapper.Map<List<AuthorDto>>(author);
-        return translate;
     }
 
-    public async Task<AuthorDto?> GetAuthorsById(int id)
+    public async Task<Response<AuthorDto>> UpdateAuthor(AuthorDto author_)
     {
-        var author = await context.Authors.FirstOrDefaultAsync(a => a.Id == id);
-        var translate = mapper.Map<AuthorDto>(author);
-        return translate;
+        try
+        {
+            var check = await context.Authors.FindAsync(author_.Id);
+            if (check == null)
+                return new Response<AuthorDto>(HttpStatusCode.NotFound, "Author not found");
+            
+            check.FirstName = author_.FirstName;
+            check.LastName = author_.LastName;
+            context.Authors.Update(check);
+            await context.SaveChangesAsync();
+            var result = mapper.Map<AuthorDto>(check);
+            return new Response<AuthorDto>(HttpStatusCode.OK, "Author updated successfully!", result);
+        }
+        catch (Exception ex)
+        {
+            return new Response<AuthorDto>(HttpStatusCode.BadRequest, $"Error: {ex.Message}");
+        }
+    }
+
+    public async Task<Response<string>> DeleteAuthor(int id)
+    {
+        try
+        {
+            var author = await context.Authors.FindAsync(id);
+            if (author == null)
+                return new Response<string>(HttpStatusCode.NotFound, "Author not found");
+            
+            context.Authors.Remove(author);
+            await context.SaveChangesAsync();
+            return new Response<string>(HttpStatusCode.OK, "Author deleted successfully!");
+        }
+        catch (Exception ex)
+        {
+            return new Response<string>(HttpStatusCode.BadRequest, $"Error: {ex.Message}");
+        }
+    }
+
+    public async Task<Response<PagedResponse<List<AuthorDto>>>> GetAuthors(AuthorsFilter filter)
+    {
+        try
+        {
+            var query = context.Authors
+                .AsQueryable();
+            
+            if (filter.Id.HasValue)
+            {
+                query = query.Where(x => x.Id == filter.Id.Value);
+            }
+            if (!string.IsNullOrEmpty(filter.FirstName))
+            {
+                query = query.Where(x => x.FirstName.Contains(filter.FirstName));
+            }
+            if (!string.IsNullOrEmpty(filter.LastName))
+            {
+                query = query.Where(x => x.LastName != null && x.LastName.Contains(filter.LastName));
+            }
+            
+            var totalRecords = await query.CountAsync();
+            
+            var page = filter.Page > 0 ? filter.Page : 1;
+            var size = filter.Size > 0 ? filter.Size : 20;
+
+            var authors = await query
+                .Skip((page - 1) * size)
+                .Take(size)
+                .ToListAsync();
+            
+            var result = mapper.Map<List<AuthorDto>>(authors);
+
+            var pagedResponse = new PagedResponse<List<AuthorDto>>
+            {
+                Data = result,
+                Page = page,
+                Size = size,
+                TotalRecords = totalRecords
+            };
+
+            return new Response<PagedResponse<List<AuthorDto>>>
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Message = "Authors retrieved successfully!",
+                Data = pagedResponse
+            };
+        }
+        catch (Exception ex)
+        {
+            return new Response<PagedResponse<List<AuthorDto>>>(HttpStatusCode.BadRequest, $"Error: {ex.Message}");
+        }
+    }
+
+    public async Task<Response<AuthorDto>> GetAuthorsById(int id)
+    {
+        try
+        {
+            var author = await context.Authors.FirstOrDefaultAsync(a => a.Id == id);
+            if (author == null)
+                return new Response<AuthorDto>(HttpStatusCode.NotFound, "Author not found");
+            
+            var result = mapper.Map<AuthorDto>(author);
+            return new Response<AuthorDto>(HttpStatusCode.OK, "Author retrieved successfully!", result);
+        }
+        catch (Exception ex)
+        {
+            return new Response<AuthorDto>(HttpStatusCode.BadRequest, $"Error: {ex.Message}");
+        }
     }
 }

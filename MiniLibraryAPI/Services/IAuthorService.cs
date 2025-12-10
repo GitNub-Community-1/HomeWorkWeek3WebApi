@@ -1,15 +1,16 @@
 ﻿using MiniLibraryAPI.DTOs;
 using MiniLibraryAPI.Entities;
 using MiniLibraryAPI.Models.DTOs;
+using MiniLibraryAPI.Infrastructure.Responses;
 
 namespace MiniLibraryAPI.Services;
 
 public interface IAuthorService
 {
-    Task<AuthorDto> AddAuthor(CreateAuthorDto author);
-    Task<Author> UpdateAuthor(AuthorDto author);
-    Task<int> DeleteAuthor(int id);
-    Task<List<AuthorDto>> GetAuthors(AuthorsFilter filter);
-    Task<AuthorDto> GetAuthorsById(int id);
+    Task<Response<AuthorDto>> AddAuthor(CreateAuthorDto author);
+    Task<Response<AuthorDto>> UpdateAuthor(AuthorDto author);
+    Task<Response<string>> DeleteAuthor(int id);
+    Task<Response<PagedResponse<List<AuthorDto>>>> GetAuthors(AuthorsFilter filter);
+    Task<Response<AuthorDto>> GetAuthorsById(int id);
     
 }

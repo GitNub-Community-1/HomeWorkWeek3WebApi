@@ -3,6 +3,7 @@ using MiniLibraryAPI.DTOs;
 using MiniLibraryAPI.Entities;
 using MiniLibraryAPI.Models.DTOs;
 using MiniLibraryAPI.Services;
+using MiniLibraryAPI.Infrastructure.Responses;
 
 namespace MiniLibraryAPI.Controllers;
 
@@ -11,43 +12,38 @@ namespace MiniLibraryAPI.Controllers;
 public class BookController(IBookService _service) : ControllerBase
 {
     [HttpPost]
-    public async Task<BookDto> AddBook(CreateBookDto book)
+    public async Task<Response<BookDto>> AddBook(CreateBookDto book)
     {
-        var createdBook = await _service.AddBook(book);
-        return createdBook;
+        var result = await _service.AddBook(book);
+        return result;
     }
     
     [HttpPut]
-    public async Task<Book> UpdateBook(BookDto book)
+    public async Task<Response<BookDto>> UpdateBook(BookDto book)
     { 
-        var updateBook = await _service.UpdateBook(book);
-        return updateBook;
+        var result = await _service.UpdateBook(book);
+        return result;
     }
 
     [HttpDelete("{id}")]
-    public async Task<string> DeleteBook(int id)
+    public async Task<Response<string>> DeleteBook(int id)
     {
         var result = await _service.DeleteBook(id);
-        if(result>0)
-        {
-            return "Delete Succefully!";
-        }
-
-        return "Deleted not succefully!";
+        return result;
     }
 
 
     [HttpGet]
-    public async Task<List<BookDto>> GetBooks([FromQuery] BookFilter filter)
+    public async Task<Response<PagedResponse<List<BookDto>>>> GetBooks([FromQuery] BookFilter filter)
     {
-        var books = await _service.GetBooks(filter);
-        return books;
+        var result = await _service.GetBooks(filter);
+        return result;
     }
 
     [HttpGet("{id}")]
-    public async Task<BookDto> GetBooksById(int id)
+    public async Task<Response<BookDto>> GetBooksById(int id)
     {
-        var books = await _service.GetBookById(id);
-        return books;
+        var result = await _service.GetBookById(id);
+        return result;
     }    
 }

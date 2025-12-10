@@ -3,6 +3,7 @@ using MiniLibraryAPI.DTOs;
 using MiniLibraryAPI.Entities;
 using MiniLibraryAPI.Models.DTOs;
 using MiniLibraryAPI.Services;
+using MiniLibraryAPI.Infrastructure.Responses;
 
 namespace MiniLibraryAPI.Controllers;
 [ApiController]
@@ -10,43 +11,38 @@ namespace MiniLibraryAPI.Controllers;
 public class AuthorController(IAuthorService _service) : ControllerBase
 {
     [HttpPost]
-    public async Task<CreateAuthorDto> AddAuthor(CreateAuthorDto author)
+    public async Task<Response<AuthorDto>> AddAuthor(CreateAuthorDto author)
     {
-        var createdCategory = await _service.AddAuthor(author);
-        return author;
+        var result = await _service.AddAuthor(author);
+        return result;
     }
     
     [HttpPut]
-    public async Task<Author> UpdateAuthor(AuthorDto author)
+    public async Task<Response<AuthorDto>> UpdateAuthor(AuthorDto author)
     { 
-        var updateAuthor = await _service.UpdateAuthor(author);
-        return updateAuthor;
+        var result = await _service.UpdateAuthor(author);
+        return result;
     }
 
     [HttpDelete("{id}")]
-    public async Task<string> DeleteAuthor(int id)
+    public async Task<Response<string>> DeleteAuthor(int id)
     {
         var result = await _service.DeleteAuthor(id);
-        if(result>0)
-        {
-            return "Delete Succefully!";
-        }
-
-        return "Deleted not succefully!";
+        return result;
     }
 
 
     [HttpGet]
-    public async Task<List<AuthorDto>> GetAuthors([FromQuery]AuthorsFilter filter)
+    public async Task<Response<PagedResponse<List<AuthorDto>>>> GetAuthors([FromQuery]AuthorsFilter filter)
     {
-        var authors = await _service.GetAuthors(filter);
-        return authors;
+        var result = await _service.GetAuthors(filter);
+        return result;
     }
 
     [HttpGet("{id}")]
-    public async Task<AuthorDto> GetAuthorById(int id)
+    public async Task<Response<AuthorDto>> GetAuthorById(int id)
     {
-        var author = await _service.GetAuthorsById(id);
-        return author;
+        var result = await _service.GetAuthorsById(id);
+        return result;
     }    
 }

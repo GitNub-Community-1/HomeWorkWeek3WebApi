@@ -7,4 +7,6 @@ public class BookFilter
     public string? Description { get; set; }
     public long? AuthorId { get; set; }
     public long? CategoryId { get; set; }
+    public int Page { get; set; } = 1;
+    public int Size { get; set; } = 20;
 }

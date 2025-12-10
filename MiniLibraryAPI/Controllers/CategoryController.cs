@@ -3,6 +3,7 @@ using MiniLibraryAPI.DTOs;
 using MiniLibraryAPI.Entities;
 using MiniLibraryAPI.Models.DTOs;
 using MiniLibraryAPI.Services;
+using MiniLibraryAPI.Infrastructure.Responses;
 
 namespace MiniLibraryAPI.Controllers;
 
@@ -11,43 +12,38 @@ namespace MiniLibraryAPI.Controllers;
 public class CategoryController(ICategoryService _service) : ControllerBase
 {
     [HttpPost]
-    public async Task<CategoryDtos> AddCategory(CreateCategoryDto category)
+    public async Task<Response<CategoryDtos>> AddCategory(CreateCategoryDto category)
     {
-        var createdCategory = await _service.AddCategory(category);
-        return createdCategory;
+        var result = await _service.AddCategory(category);
+        return result;
     }
     
     [HttpPut]
-    public async Task<Category> UpdateCategory(CategoryDtos category)
+    public async Task<Response<CategoryDtos>> UpdateCategory(CategoryDtos category)
     { 
-        var updatedCategory = await _service.UpdateCategory(category);
-        return updatedCategory;
+        var result = await _service.UpdateCategory(category);
+        return result;
     }
 
     [HttpDelete("{id}")]
-    public async Task<string> DeleteCategory(int id)
+    public async Task<Response<string>> DeleteCategory(int id)
     {
         var result = await _service.DeleteCategory(id);
-        if(result>0)
-        {
-            return "Delete Succefully!";
-        }
-
-        return "Deleted not succefully!";
+        return result;
     }
 
 
     [HttpGet]
-    public async Task<List<CategoryDtos>> GetCategories([FromQuery]CategoryFilter filter)
+    public async Task<Response<PagedResponse<List<CategoryDtos>>>> GetCategories([FromQuery]CategoryFilter filter)
     {
-        var categories = await _service.GetCategories(filter);
-        return categories;
+        var result = await _service.GetCategories(filter);
+        return result;
     }
 
     [HttpGet("{id}")]
-    public async Task<CategoryDtos> GetCategoryById(int id)
+    public async Task<Response<CategoryDtos>> GetCategoryById(int id)
     {
-        var category = await _service.GetCategoryById(id);
-        return category;
+        var result = await _service.GetCategoryById(id);
+        return result;
     }
 }

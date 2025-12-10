@@ -3,6 +3,7 @@ using MiniLibraryAPI.DTOs;
 using MiniLibraryAPI.Entities;
 using MiniLibraryAPI.Models.DTOs;
 using MiniLibraryAPI.Services;
+using MiniLibraryAPI.Infrastructure.Responses;
 
 namespace MiniLibraryAPI.Controllers;
 
@@ -12,43 +13,38 @@ namespace MiniLibraryAPI.Controllers;
 public class OrderController(IOrderService _service) : ControllerBase
 {
     [HttpPost]
-    public async Task<OrderDto> AddOrder(CreateOrderDto order)
+    public async Task<Response<OrderDto>> AddOrder(CreateOrderDto order)
     {
-        var CreatedOrder = await _service.AddOrder(order);
-        return CreatedOrder;
+        var result = await _service.AddOrder(order);
+        return result;
     }
     
     [HttpPut]
-    public async Task<Order> UpdateOrder(OrderDto order)
+    public async Task<Response<OrderDto>> UpdateOrder(OrderDto order)
     { 
-        var updateOrder = await _service.UpdateOrder(order);
-        return updateOrder;
+        var result = await _service.UpdateOrder(order);
+        return result;
     }
 
     [HttpDelete("{id}")]
-    public async Task<string> DeleteOrder(int id)
+    public async Task<Response<string>> DeleteOrder(int id)
     {
         var result = await _service.DeleteOrder(id);
-        if(result>0)
-        {
-            return "Delete Succefully!";
-        }
-
-        return "Deleted not succefully!";
+        return result;
     }
 
 
     [HttpGet]
-    public async Task<List<OrderDto>> GetOrders([FromQuery]OrderFilter filter)
+    public async Task<Response<PagedResponse<List<OrderDto>>>> GetOrders([FromQuery]OrderFilter filter)
     {
-        var orders = await _service.GetOrders(filter);
-        return orders;
+        var result = await _service.GetOrders(filter);
+        return result;
     }
 
     [HttpGet("{id}")]
-    public async Task<OrderDto> GetOrderById(int id)
+    public async Task<Response<OrderDto>> GetOrderById(int id)
     {
-        var order = await _service.GetOrderById(id);
-        return order;
+        var result = await _service.GetOrderById(id);
+        return result;
     }
 }

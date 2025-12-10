@@ -17,6 +17,5 @@ public class MapperProfile : Profile
         CreateMap<BookDto,Book>().ReverseMap();
         CreateMap<CreateCategoryDto,Category>().ReverseMap();
         CreateMap<CategoryDtos,Category>().ReverseMap();
-
     }
 }
